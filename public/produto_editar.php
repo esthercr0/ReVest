@@ -23,16 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $preco     = (float)str_replace(',', '.', $_POST['preco'] ?? '0');
         $condicao  = $_POST['condicao'] ?? 'USADO';
         $id_cat    = (int)($_POST['id_categoria'] ?? 0);
-        $status    = $_POST['status'] ?? $prod['status'];
 
         if (mb_strlen($titulo) < 3) $erros[]='Título muito curto.';
         if (mb_strlen($descricao) < 10) $erros[]='Descrição muito curta.';
         if ($preco <= 0) $erros[]='Preço deve ser maior que zero.';
-        if (!in_array($status,['DISPONIVEL','RESERVADO','VENDIDO','REMOVIDO'],true)) $status=$prod['status'];
 
         if (!$erros) {
-            $up = $pdo->prepare("UPDATE produto SET titulo=:t, descricao=:d, preco=:p, condicao=:c, id_categoria=:cat, status=:s WHERE id_produto=:id");
-            $up->execute([':t'=>$titulo,':d'=>$descricao,':p'=>$preco,':c'=>$condicao,':cat'=>$id_cat,':s'=>$status,':id'=>$id]);
+            $up = $pdo->prepare("UPDATE produto SET titulo=:t, descricao=:d, preco=:p, condicao=:c, id_categoria=:cat WHERE id_produto=:id");
+            $up->execute([':t'=>$titulo,':d'=>$descricao,':p'=>$preco,':c'=>$condicao,':cat'=>$id_cat,':id'=>$id]);
             flash('ok','Anúncio atualizado.');
             header('Location: produto_ver.php?id='.$id); exit;
         }
@@ -63,11 +61,6 @@ require_once __DIR__.'/../includes/header.php';
       <div class="field"><label for="id_categoria">Categoria</label><select id="id_categoria" name="id_categoria" required>
         <?php foreach ($categorias as $c): ?>
           <option value="<?= $c['id_categoria'] ?>" <?= (int)$prod['id_categoria']===(int)$c['id_categoria']?'selected':'' ?>><?= e($c['nome']) ?></option>
-        <?php endforeach; ?>
-      </select></div>
-      <div class="field"><label for="status">Status</label><select id="status" name="status">
-        <?php foreach (['DISPONIVEL'=>'Disponível','RESERVADO'=>'Reservado','VENDIDO'=>'Vendido','REMOVIDO'=>'Removido'] as $k=>$v): ?>
-          <option value="<?= $k ?>" <?= $prod['status']===$k?'selected':'' ?>><?= $v ?></option>
         <?php endforeach; ?>
       </select></div>
     </div>

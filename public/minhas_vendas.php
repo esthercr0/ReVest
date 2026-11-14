@@ -9,15 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_check()) {
     if ($acao === 'enviar') {
         $idPedido = (int)$_POST['id_pedido'];
         $rastreio = trim($_POST['rastreio'] ?? '');
-        // confirma que o pedido é de um produto do vendedor logado
-        $chk = $pdo->prepare("SELECT 1 FROM pedido p JOIN produto pr ON pr.id_produto=p.id_produto
-                              WHERE p.id_pedido=? AND pr.id_vendedor=?");
-        $chk->execute([$idPedido, uid()]);
-        if ($chk->fetch()) {
-            $pdo->prepare("UPDATE entrega SET status='EM_TRANSITO', codigo_rastreio=?, dt_postagem=CURDATE() WHERE id_pedido=?")
-                ->execute([$rastreio ?: null, $idPedido]);
-            $pdo->prepare("UPDATE pedido SET status='ENVIADO' WHERE id_pedido=? AND status='PAGO'")->execute([$idPedido]);
-            flash('ok','Pedido marcado como enviado.');
+        $enviar = $pdo->prepare("UPDATE pedido p
+            JOIN produto pr ON pr.id_produto = p.id_produto
+            JOIN entrega e ON e.id_pedido = p.id_pedido
+            SET p.status = 'ENVIADO', e.status = 'EM_TRANSITO',
+                e.codigo_rastreio = ?, e.dt_postagem = CURDATE()
+            WHERE p.id_pedido = ? AND pr.id_vendedor = ?
+              AND p.status = 'PAGO' AND e.status = 'AGUARDANDO'");
+        $enviar->execute([$rastreio ?: null, $idPedido, uid()]);
+        if ($enviar->rowCount() > 0) {
+            flash('ok', 'Pedido marcado como enviado.');
+        } else {
+            flash('warn', 'Pedido indisponível para envio.');
         }
         header('Location: minhas_vendas.php'); exit;
     }

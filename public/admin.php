@@ -51,8 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             /* ---- Produtos ---- */
             case 'prod_remover':
                 $id = (int)$_POST['id'];
-                $pdo->prepare("UPDATE produto SET status='REMOVIDO' WHERE id_produto=?")->execute([$id]);
-                flash('ok', 'Anúncio removido do catálogo.');
+                $remover = $pdo->prepare("UPDATE produto SET status='REMOVIDO' WHERE id_produto=? AND status='DISPONIVEL'");
+                $remover->execute([$id]);
+                flash($remover->rowCount() ? 'ok' : 'warn', $remover->rowCount() ? 'Anúncio removido.' : 'Somente anúncios disponíveis podem ser removidos.');
                 break;
 
             /* ---- Denúncias (RF 17) ---- */
@@ -208,7 +209,7 @@ require_once __DIR__ . '/../includes/header.php';
             <td><?= money((float)$p['preco']) ?></td>
             <td><?= badge($p['status']) ?></td>
             <td style="text-align:right">
-              <?php if ($p['status'] !== 'REMOVIDO'): ?>
+              <?php if ($p['status'] === 'DISPONIVEL'): ?>
                 <form method="post" style="display:inline" onsubmit="return confirm('Remover este anúncio do catálogo?')">
                   <?= csrf_field() ?>
                   <input type="hidden" name="acao" value="prod_remover">
