@@ -17,8 +17,7 @@ no código PHP da aplicação e no próprio SGBD (stored procedure + triggers + 
 - HTML5 + CSS próprio (sem framework), tipografia Fraunces + Inter
 - Sem dependências externas de back-end — roda em qualquer host PHP + MySQL
 
-Extensões PHP necessárias: `pdo_mysql`. Recomendada: `mbstring`
-(a aplicação tem _fallback_ caso `mbstring` não esteja presente).
+Extensões PHP necessárias: `pdo_mysql` e `mbstring`.
 
 ---
 
@@ -58,16 +57,16 @@ revest/
 
 ## Instalação local (passo a passo)
 
-### 1. Criar o banco e carregar os scripts (nesta ordem)
+### 1. Instalar em um banco `revest` novo e vazio
 
 ```bash
 mysql -u root -p < sql/01_ddl.sql
-mysql -u root -p < sql/02_seed.sql
 mysql -u root -p < sql/03_routines.sql
 ```
 
-> A ordem importa: o DDL cria as tabelas e views, o seed popula os dados, e as
-> rotinas dependem das tabelas já existentes.
+Para uma demonstração local descartável, carregue também `sql/02_seed.sql` com o cliente MySQL. Esse script apaga os dados das 13 tabelas e instala as contas de demonstração, inclusive a administrativa. Execute-o somente em uma base de laboratório.
+
+O DDL é de instalação inicial. Em uma instalação existente da versão anterior, faça backup, pause as operações da aplicação e aplique apenas `sql/03_routines.sql` junto à atualização do PHP. Confira pedidos, pagamentos, produtos e entregas antigos antes de retomar as vendas. A atualização das rotinas não reconcilia inconsistências históricas.
 
 ### 2. Configurar a conexão
 
@@ -110,7 +109,7 @@ DATABASE_URL=mysql://usuario:senha@host:3306/revest
 Passos típicos:
 
 1. Provisione um banco MySQL no provedor e copie a connection string.
-2. Importe os três scripts SQL no banco remoto (na ordem indicada acima).
+2. Para uma instalação nova, use um banco vazio chamado `revest` e importe `01_ddl.sql` e `03_routines.sql`. O seed é exclusivo de laboratório. Cadastre o responsável pela administração e conceda `is_admin` à conta verificada pelo operador do banco.
 3. Defina `DATABASE_URL` nas variáveis de ambiente do serviço web.
 4. Configure o _start command_ apontando o document root para `public/`,
    por exemplo: `php -S 0.0.0.0:$PORT -t public`.
@@ -119,7 +118,7 @@ Passos típicos:
 
 ## Contas de demonstração
 
-Todas as contas usam a senha **`senha123`**.
+Na carga opcional de laboratório, todas as contas usam a senha **`senha123`**.
 
 | E-mail               | Perfil        |
 |----------------------|---------------|

@@ -10,22 +10,6 @@ CREATE DATABASE IF NOT EXISTS revest
   DEFAULT COLLATE utf8mb4_unicode_ci;
 USE revest;
 
-SET FOREIGN_KEY_CHECKS = 0;
-
-DROP TABLE IF EXISTS denuncia;
-DROP TABLE IF EXISTS avaliacao;
-DROP TABLE IF EXISTS entrega;
-DROP TABLE IF EXISTS pagamento;
-DROP TABLE IF EXISTS pedido;
-DROP TABLE IF EXISTS mensagem;
-DROP TABLE IF EXISTS conversa;
-DROP TABLE IF EXISTS favorito;
-DROP TABLE IF EXISTS imagem_produto;
-DROP TABLE IF EXISTS produto;
-DROP TABLE IF EXISTS categoria;
-DROP TABLE IF EXISTS endereco;
-DROP TABLE IF EXISTS usuario;
-
 -- ---------------------------------------------------------------------
 -- 1. USUARIO
 -- ---------------------------------------------------------------------
@@ -277,8 +261,6 @@ CREATE TABLE denuncia (
     FOREIGN KEY (id_usuario_alvo) REFERENCES usuario(id_usuario)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
-SET FOREIGN_KEY_CHECKS = 1;
 
 -- =====================================================================
 -- VISÕES (Entrega 2)

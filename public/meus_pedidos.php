@@ -15,9 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_check()) {
         $chk->execute([$idPedido, uid()]);
         if ($chk->fetch()) {
             $novo = $acao === 'pagar' ? 'APROVADO' : 'RECUSADO';
-            $upd = $pdo->prepare("UPDATE pagamento SET status=?, dt_pagamento=NOW() WHERE id_pedido=?");
+            $upd = $pdo->prepare("UPDATE pagamento SET status=?, dt_pagamento=NOW() WHERE id_pedido=? AND status='PENDENTE'");
             $upd->execute([$novo, $idPedido]);
-            flash('ok', $acao==='pagar' ? 'Pagamento aprovado! Produto marcado como vendido.' : 'Pagamento recusado. Produto liberado.');
+            if ($upd->rowCount() === 1) {
+                flash('ok', $acao === 'pagar' ? 'Pagamento aprovado! Produto marcado como vendido.' : 'Pagamento recusado. Produto liberado.');
+            } else {
+                flash('warn', 'Este pagamento já foi processado.');
+            }
         }
         header('Location: meus_pedidos.php'); exit;
     }

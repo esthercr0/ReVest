@@ -80,7 +80,7 @@ INSERT INTO imagem_produto (url, ordem, id_produto) VALUES
 INSERT INTO pedido (valor_total, status, id_comprador, id_produto, id_endereco_entrega) VALUES
  (2500.00,'ENTREGUE', 5, 1, 4),  -- Ana comprou o iPhone da Esther
  (3200.00,'ENTREGUE', 6, 3, 5),  -- Bruno comprou o Notebook do Marco
- (1899.00,'PAGO',     7, 6, 6),  -- Carla comprou a TV da Ana
+ (1899.00,'ENVIADO',     7, 6, 6),  -- Carla comprou a TV da Ana
  ( 480.00,'CANCELADO',6, 9, 5);  -- Bruno cancelou o Kindle
 
 -- Pagamentos

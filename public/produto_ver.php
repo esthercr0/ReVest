@@ -62,7 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $own = $pdo->prepare("SELECT id_vendedor FROM produto WHERE id_produto=?");
         $own->execute([$id]);
         if ((int)$own->fetchColumn() === uid() || is_admin()) {
-            $pdo->prepare("UPDATE produto SET status='REMOVIDO' WHERE id_produto=?")->execute([$id]);
+            $remover = $pdo->prepare("UPDATE produto SET status='REMOVIDO' WHERE id_produto=? AND status='DISPONIVEL'");
+            $remover->execute([$id]);
             flash('ok','Anúncio removido.');
             header('Location: index.php'); exit;
         }
@@ -167,10 +168,12 @@ require_once __DIR__ . '/../includes/header.php';
       <div class="alert alert-warn"><strong>i</strong><div>Este é o seu anúncio.</div></div>
       <div class="flex gap-12">
         <a class="btn btn-ghost" href="produto_editar.php?id=<?= $id ?>">Editar</a>
+        <?php if ($prod['status'] === 'DISPONIVEL'): ?>
         <form method="post" onsubmit="return confirm('Remover este anúncio?')">
           <?= csrf_field() ?><input type="hidden" name="acao" value="remover">
           <button class="btn btn-danger" type="submit">Remover anúncio</button>
         </form>
+        <?php endif; ?>
       </div>
 
     <?php elseif ($prod['status'] !== 'DISPONIVEL'): ?>

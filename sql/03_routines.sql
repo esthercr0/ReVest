@@ -32,6 +32,8 @@ BEGIN
     RESIGNAL;
   END;
 
+  START TRANSACTION;
+
   -- Recupera dados do produto (trava a linha)
   SELECT preco, status, id_vendedor
     INTO v_preco, v_status, v_id_vendedor
@@ -54,7 +56,10 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não é permitido comprar o próprio produto.';
   END IF;
 
-  START TRANSACTION;
+  IF NOT EXISTS (SELECT 1 FROM endereco
+                  WHERE id_endereco = p_id_endereco AND id_usuario = p_id_comprador) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Endereço de entrega inválido.';
+  END IF;
 
     INSERT INTO pedido (valor_total, status, id_comprador, id_produto, id_endereco_entrega)
     VALUES (v_preco, 'PENDENTE', p_id_comprador, p_id_produto, p_id_endereco);
@@ -82,6 +87,10 @@ CREATE TRIGGER trg_pagamento_aprovado
 AFTER UPDATE ON pagamento
 FOR EACH ROW
 BEGIN
+  IF OLD.status <> 'PENDENTE' AND NEW.status <> OLD.status THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Pagamento já finalizado.';
+  END IF;
+
   IF OLD.status <> 'APROVADO' AND NEW.status = 'APROVADO' THEN
     UPDATE pedido SET status = 'PAGO' WHERE id_pedido = NEW.id_pedido;
     UPDATE produto
